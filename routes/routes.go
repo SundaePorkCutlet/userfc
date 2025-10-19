@@ -6,9 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(router *gin.Engine, userHandler handler.UserHandler) {
+func SetupRoutes(router *gin.Engine, userHandler *handler.UserHandler) {
 	//public API
-	router.GET("/ping", userHandler.Ping)
+	router.GET("/ping", userHandler.Ping())
+	router.POST("/register", userHandler.Register)
 
 	//private API
 }
