@@ -44,7 +44,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	user, err := h.UserUsecase.GetUserByEmail(registerParam.Email)
+	user, err := h.UserUsecase.GetUserByEmail(c.Request.Context(), registerParam.Email)
 	if err != nil {
 		log.Logger.Info().Err(err).Msg("Error getting user by email")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -55,7 +55,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	err = h.UserUsecase.RegisterUser(&models.User{
+	err = h.UserUsecase.RegisterUser(c.Request.Context(), &models.User{
 		Name:     registerParam.Name,
 		Email:    registerParam.Email,
 		Password: registerParam.Password, //plain text password
@@ -66,4 +66,58 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
+}
+
+func (h *UserHandler) GetUserInfo(c *gin.Context) {
+	userIdString, ok := c.Get("user_id")
+	if !ok {
+		log.Logger.Info().Msg("User ID not found in context")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User ID not found in context"})
+		return
+	}
+
+	userId, ok := userIdString.(float64)
+	if !ok {
+		log.Logger.Info().Msg("Invalid user ID")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	user, err := h.UserUsecase.GetUserByUserId(c.Request.Context(), int64(userId))
+	if err != nil {
+		log.Logger.Info().Err(err).Msg("Error getting user by user id")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if user.ID == 0 {
+		log.Logger.Info().Msg("User not found")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"name": user.Name, "email": user.Email})
+
+}
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var loginParam models.LoginParameter
+	if err := c.ShouldBindJSON(&loginParam); err != nil {
+		log.Logger.Info().Err(err).Msgf("Invalid JSON format in login request: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(loginParam.Password) < 8 {
+		log.Logger.Info().Msg("Password too short - less than 8 characters")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password must be at least 8 characters long"})
+		return
+	}
+
+	token, err := h.UserUsecase.Login(c.Request.Context(), &loginParam)
+	if err != nil {
+		log.Logger.Info().Err(err).Msgf("Error logging in: %s", err.Error())
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }

@@ -14,3 +14,8 @@ type User struct {
 	Password string `json:"password"`
 	Role     string `json:"role"`
 }
+
+type LoginParameter struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}

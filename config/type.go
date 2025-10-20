@@ -23,3 +23,7 @@ type RedisConfig struct {
 	Port     string `yaml:"port" validate:"required"`
 	Password string `yaml:"password" validate:"required"`
 }
+
+type SecretConfig struct {
+	JwtSecret string `yaml:"jwt_secret" validate:"required"`
+}
