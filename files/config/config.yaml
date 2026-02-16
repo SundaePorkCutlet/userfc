@@ -2,7 +2,7 @@ app:
   port: 8080
 
 database:
-  host: postgres
+  host: postgres-user
   port: 5432
   user: admin
   password: admin
