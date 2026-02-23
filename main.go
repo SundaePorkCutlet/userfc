@@ -20,6 +20,9 @@ func main() {
 
 	log.SetupLogger()
 
+	// Vault에서 secrets 로드
+	config.LoadVaultSecrets(&cfg)
+
 	redis := resource.InitRedis(cfg.Redis)
 	db := resource.InitDB(cfg.Database)
 

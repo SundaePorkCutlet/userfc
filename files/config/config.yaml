@@ -16,3 +16,8 @@ redis:
 
 secret:
   jwt_secret: secret301
+
+vault:
+  host: http://vault:8200
+  token: fcproject
+  path: userfc

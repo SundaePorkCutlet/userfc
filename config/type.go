@@ -4,7 +4,28 @@ type Config struct {
 	App      AppConfig      `yaml:"app" validate:"required"`
 	Database DatabaseConfig `yaml:"database" validate:"required"`
 	Redis    RedisConfig    `yaml:"redis" validate:"required"`
-	Secret   SecretConfig   `yaml:"secret" validate:"required"`
+	Secret   SecretConfig   `yaml:"secret"`
+	Vault    VaultConfig    `yaml:"vault"`
+}
+
+type VaultConfig struct {
+	Host  string `yaml:"host" validate:"required"`
+	Token string `yaml:"token" validate:"required"`
+	Path  string `yaml:"path" validate:"required"`
+}
+
+type SecretVaultConfig struct {
+	DatabaseSecret DatabaseSecretConfig `json:"database"`
+	RedisSecret    RedisSecretConfig    `json:"redis"`
+	JWTSecret      string               `json:"jwt_secret"`
+}
+
+type DatabaseSecretConfig struct {
+	Password string `json:"password"`
+}
+
+type RedisSecretConfig struct {
+	Password string `json:"password"`
 }
 
 type AppConfig struct {
