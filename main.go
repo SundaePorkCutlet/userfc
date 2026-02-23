@@ -7,6 +7,7 @@ import (
 	"userfc/cmd/user/service"
 	"userfc/cmd/user/usecase"
 	"userfc/config"
+	usergrpc "userfc/grpc"
 	"userfc/infrastructure/log"
 	"userfc/models"
 	"userfc/routes"
@@ -33,12 +34,14 @@ func main() {
 	userUsecase := usecase.NewUserUsecase(*userService)
 	userHandler := handler.NewUserHandler(*userUsecase)
 
+	// gRPC 서버 시작 (별도 고루틴)
+	go usergrpc.StartGRPCServer(cfg.App.GRPCPort, userService)
+
 	port := cfg.App.Port
 	router := gin.Default()
 
 	routes.SetupRoutes(router, userHandler)
 
+	log.Logger.Info().Msgf("HTTP server is running on port %s", port)
 	router.Run(":" + port)
-
-	log.Logger.Info().Msgf("Server is running on port %s", port)
 }

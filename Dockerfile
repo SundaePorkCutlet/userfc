@@ -1,5 +1,5 @@
 # Go 빌드 스테이지
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
@@ -26,7 +26,8 @@ COPY --from=builder /app/main .
 COPY --from=builder /app/files/config ./files/config
 
 # 포트 노출
-EXPOSE 8080
+EXPOSE 28080
+EXPOSE 50051
 
 # 애플리케이션 실행
 CMD ["./main"]

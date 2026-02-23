@@ -8,7 +8,8 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Port string `yaml:"port" validate:"required"`
+	Port     string `yaml:"port" validate:"required"`
+	GRPCPort string `yaml:"grpc_port" mapstructure:"grpc_port"`
 }
 
 type DatabaseConfig struct {
