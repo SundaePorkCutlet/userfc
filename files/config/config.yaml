@@ -21,3 +21,8 @@ vault:
   host: http://vault:8200
   token: fcproject
   path: userfc
+
+tracing:
+  endpoint: jaeger:4318
+  service_name: userfc
+  enabled: true
