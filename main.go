@@ -1,3 +1,4 @@
+// Package main USERFC - User & Auth service.
 package main
 
 import (
@@ -14,9 +15,17 @@ import (
 	"userfc/routes"
 	"userfc/tracing"
 
+	_ "userfc/docs"
+
 	"github.com/gin-gonic/gin"
 )
 
+// @title           USERFC API
+// @version         1.0
+// @description     User registration, authentication (JWT), and user info for Go Commerce.
+// @host            localhost:28080
+// @BasePath        /
+// @schemes         http
 func main() {
 	cfg := config.LoadConfig()
 
@@ -43,7 +52,7 @@ func main() {
 	log.Logger.Info().Msg("Database migration completed")
 
 	userRepository := repository.NewUserRepository(db, redis)
-	userService := service.NewUserService(*userRepository)
+	userService := service.NewUserService(userRepository)
 	userUsecase := usecase.NewUserUsecase(*userService)
 	userHandler := handler.NewUserHandler(*userUsecase)
 
