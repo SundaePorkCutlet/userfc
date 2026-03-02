@@ -1,0 +1,11 @@
+# USERFC 메트릭 스크랩 설정 (중앙 Prometheus에서 참조/병합용)
+# 호스트명은 docker-compose 네트워크 내부 기준 (userfc:28080)
+scrape_configs:
+  - job_name: userfc
+    static_configs:
+      - targets:
+          - userfc:28080
+        labels:
+          service: userfc
+    metrics_path: /metrics
+    scrape_interval: 15s
