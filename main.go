@@ -11,6 +11,8 @@ import (
 	"userfc/config"
 	usergrpc "userfc/grpc"
 	"userfc/infrastructure/log"
+	"userfc/infrastructure/ratelimiter"
+	"userfc/infrastructure/tokenblacklist"
 	"userfc/models"
 	"userfc/routes"
 	"userfc/tracing"
@@ -51,10 +53,14 @@ func main() {
 	}
 	log.Logger.Info().Msg("Database migration completed")
 
+	rl := ratelimiter.NewRateLimiter(redis, 10, 60)
+	bl := tokenblacklist.NewTokenBlacklist(redis)
+
 	userRepository := repository.NewUserRepository(db, redis)
 	userService := service.NewUserService(userRepository)
 	userUsecase := usecase.NewUserUsecase(*userService)
 	userHandler := handler.NewUserHandler(*userUsecase)
+	userHandler.Blacklist = bl
 
 	// gRPC 서버 시작 (별도 고루틴)
 	go usergrpc.StartGRPCServer(cfg.App.GRPCPort, userService)
@@ -67,7 +73,7 @@ func main() {
 		router.Use(tracing.GinMiddleware(cfg.Tracing.ServiceName))
 	}
 
-	routes.SetupRoutes(router, userHandler)
+	routes.SetupRoutes(router, userHandler, rl, bl)
 
 	log.Logger.Info().Msgf("HTTP server is running on port %s", port)
 	router.Run(":" + port)

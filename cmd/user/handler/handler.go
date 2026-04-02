@@ -1,17 +1,24 @@
 package handler
 
 import (
+	"context"
 	"net/http"
+	"strings"
+	"time"
 	"userfc/cmd/user/usecase"
+	"userfc/config"
 	"userfc/infrastructure/log"
+	"userfc/infrastructure/tokenblacklist"
 
 	"userfc/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 type UserHandler struct {
 	UserUsecase usecase.UserUsecase
+	Blacklist   *tokenblacklist.TokenBlacklist
 }
 
 func NewUserHandler(userUsecase usecase.UserUsecase) *UserHandler {
@@ -120,4 +127,49 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func (h *UserHandler) Logout(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid authorization header"})
+		return
+	}
+
+	rawToken := parts[1]
+
+	token, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.GetJwtSecret()), nil
+	})
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid token"})
+		return
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid token claims"})
+		return
+	}
+
+	exp, ok := claims["exp"].(float64)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing expiration in token"})
+		return
+	}
+
+	ttl := time.Until(time.Unix(int64(exp), 0))
+	if ttl <= 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "token already expired"})
+		return
+	}
+
+	if err := h.Blacklist.Add(context.Background(), rawToken, ttl); err != nil {
+		log.Logger.Info().Err(err).Msg("Failed to blacklist token")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to logout"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }
