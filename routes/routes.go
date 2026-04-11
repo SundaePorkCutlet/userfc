@@ -48,6 +48,16 @@ func SetupRoutes(router *gin.Engine, userHandler *handler.UserHandler, rl *ratel
 		c.JSON(http.StatusOK, info)
 	})
 
+	router.GET("/debug/kafka", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"service":           "userfc",
+			"messages_produced": 0,
+			"messages_consumed": 0,
+			"dlq_count":         0,
+			"consumer_stats":    gin.H{},
+		})
+	})
+
 	rateLimited := router.Group("/")
 	rateLimited.Use(ratelimiter.RateLimitMiddleware(rl))
 	{
