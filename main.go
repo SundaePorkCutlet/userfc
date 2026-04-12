@@ -19,6 +19,8 @@ import (
 
 	_ "userfc/docs"
 
+	"userfc/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -67,6 +69,7 @@ func main() {
 
 	port := cfg.App.Port
 	router := gin.Default()
+	router.Use(middleware.PrometheusRED("userfc"))
 
 	// 트레이싱 미들웨어 추가
 	if cfg.Tracing.Enabled {
