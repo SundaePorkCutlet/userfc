@@ -1,0 +1,161 @@
+basePath: /
+definitions:
+  models.LoginParameter:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.RegisterParameter:
+    properties:
+      confirm_password:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - confirm_password
+    - email
+    - name
+    - password
+    type: object
+host: localhost:28080
+info:
+  contact: {}
+  description: User registration, authentication (JWT), and user info for Go Commerce.
+  title: USERFC API
+  version: "1.0"
+paths:
+  /api/v1/user-info:
+    get:
+      description: JWT 인증된 사용자의 이름/이메일을 조회합니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 내 정보 조회
+      tags:
+      - USER
+  /v1/login:
+    post:
+      consumes:
+      - application/json
+      description: 이메일/비밀번호로 로그인 후 JWT 토큰을 발급합니다.
+      parameters:
+      - description: 로그인 요청
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginParameter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 로그인
+      tags:
+      - USER
+  /v1/logout:
+    post:
+      description: 현재 JWT 토큰을 블랙리스트 처리하여 즉시 무효화합니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 로그아웃
+      tags:
+      - USER
+  /v1/register:
+    post:
+      consumes:
+      - application/json
+      description: 새로운 사용자를 등록합니다.
+      parameters:
+      - description: 회원가입 요청
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterParameter'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 회원가입
+      tags:
+      - USER
+schemes:
+- http
+swagger: "2.0"

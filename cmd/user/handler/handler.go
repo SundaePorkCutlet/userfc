@@ -31,6 +31,17 @@ func (h *UserHandler) Ping() gin.HandlerFunc {
 	}
 }
 
+// Register godoc
+// @Summary 회원가입
+// @Description 새로운 사용자를 등록합니다.
+// @Tags USER
+// @Accept json
+// @Produce json
+// @Param body body models.RegisterParameter true "회원가입 요청"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /v1/register [post]
 func (h *UserHandler) Register(c *gin.Context) {
 	var registerParam models.RegisterParameter
 	if err := c.ShouldBindJSON(&registerParam); err != nil {
@@ -75,6 +86,17 @@ func (h *UserHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
 
+// GetUserInfo godoc
+// @Summary 내 정보 조회
+// @Description JWT 인증된 사용자의 이름/이메일을 조회합니다.
+// @Tags USER
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/user-info [get]
 func (h *UserHandler) GetUserInfo(c *gin.Context) {
 	userIdString, ok := c.Get("user_id")
 	if !ok {
@@ -106,6 +128,17 @@ func (h *UserHandler) GetUserInfo(c *gin.Context) {
 
 }
 
+// Login godoc
+// @Summary 로그인
+// @Description 이메일/비밀번호로 로그인 후 JWT 토큰을 발급합니다.
+// @Tags USER
+// @Accept json
+// @Produce json
+// @Param body body models.LoginParameter true "로그인 요청"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /v1/login [post]
 func (h *UserHandler) Login(c *gin.Context) {
 	var loginParam models.LoginParameter
 	if err := c.ShouldBindJSON(&loginParam); err != nil {
@@ -129,6 +162,16 @@ func (h *UserHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
+// Logout godoc
+// @Summary 로그아웃
+// @Description 현재 JWT 토큰을 블랙리스트 처리하여 즉시 무효화합니다.
+// @Tags USER
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /v1/logout [post]
 func (h *UserHandler) Logout(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	parts := strings.Split(authHeader, " ")

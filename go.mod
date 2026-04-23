@@ -2,7 +2,7 @@ module userfc
 
 go 1.24.0
 
-toolchain go1.24.7
+toolchain go1.24.9
 
 require (
 	github.com/gin-gonic/gin v1.11.0
